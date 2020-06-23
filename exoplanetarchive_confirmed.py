@@ -4,6 +4,7 @@ import os
 import shutil
 import xml.etree.ElementTree as ET 
 import xmltools
+import html
 
 #####################
 # Exoplanet Archive
@@ -45,6 +46,9 @@ def parse():
             tempdec += " %.2i" % (round(float(p["dec_str"].split("d")[1].split("m")[1].split("s")[0]))) # seconds
             ET.SubElement(system, "declination").text = tempdec
 
+            if len(p["st_dist"])>1:
+                ET.SubElement(system, "distance", errorminus=p['st_disterr2'], errorplus=p['st_disterr1']).text = p["st_dist"]
+
             star = ET.SubElement(system,"star")
             ET.SubElement(star, "name").text = p["pl_hostname"]
             ET.SubElement(star, "radius", errorminus=p['st_raderr2'], errorplus=p['st_raderr1']).text = p["st_rad"]
@@ -64,6 +68,25 @@ def parse():
         ET.SubElement(planet, "periastron", errorminus=p['pl_orblpererr2'], errorplus=p['pl_orblpererr1']).text = p["pl_orblper"]
         ET.SubElement(planet, "inclination", errorminus=p['pl_orbinclerr2'], errorplus=p['pl_orbinclerr1']).text = p["pl_orbincl"]
         ET.SubElement(planet, "period", errorminus=p['pl_orbpererr2'], errorplus=p['pl_orbpererr1']).text = p["pl_orbper"]
+
+        description = ""
+
+        if len(p["pl_disc_refname"])>5:
+            description += "This planet was discovered by " + p["pl_disc_refname"] +". "
+            if p["pl_locale"] == "Space":
+                if len(p["pl_telescope"])>5:
+                    description += "The discovery was made with a space spaced telescope ("+p["pl_telescope"]+"). "
+                else:
+                    description += "The discovery was made with a space spaced telescope. "
+            if p["pl_locale"] == "Ground":
+                    description += "This was a ground based discovery. "
+        if len(p["pl_def_refname"])>5:
+            description += "The parameters listed here are those reported by " + p["pl_def_refname"] + " and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive. " 
+
+        description = html.unescape(description)
+        #print(description)
+        ET.SubElement(planet, "description").text = description
+
         # check for both kinds of masses
         if p['pl_massj'] == "" or p['pl_massj'] == None:
             # use msini
