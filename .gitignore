@@ -2,5 +2,4 @@ venv/
 *.pyc
 __pycache__/
 systems_exoplanetarchive/
-tmp_data/
-confirmed.csv
+exoplanetarchive.csv

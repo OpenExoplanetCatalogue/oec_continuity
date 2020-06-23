@@ -1,5 +1,5 @@
 #!/usr/bin/python 
-import urllib
+import urllib.request
 import os
 import shutil
 import xml.etree.ElementTree as ET 
@@ -13,18 +13,15 @@ url_exoplanetarchive = "https://exoplanetarchive.ipac.caltech.edu/cgi-bin/nstedA
 debug = True
 
 def get():
-    xmltools.ensure_empty_dir("tmp_data")
-    if debug:
-        shutil.copy2("confirmed.csv","tmp_data/exoplanetarchive.csv")
-        return
-    urllib.urlretrieve (url_exoplanetarchive, "tmp_data/exoplanetarchive.csv")
+    if not debug:
+        urllib.request.urlretrieve (url_exoplanetarchive, "exoplanetarchive.csv")
 
 def parse():
     # delete old data
     xmltools.ensure_empty_dir("systems_exoplanetarchive")
 
     # parse data into default xml format
-    f = open("tmp_data/exoplanetarchive.csv")
+    f = open("exoplanetarchive.csv")
     header = [x.strip() for x in f.readline().split(",")]
     for line in f:
         p = dict(zip(header, [x.strip() for x in line.split(",")]))
