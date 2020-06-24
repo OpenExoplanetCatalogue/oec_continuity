@@ -20,6 +20,18 @@ def cleanplanet(name):
     return name
 
 
+@app.route('/systems_open_exoplanet_catalogue/<name>')
+def soec(name,d="/systems_open_exoplanet_catalogue/"):
+    h = "<xmp>"
+    with open("."+d+name, 'r') as content_file:
+        h += "".join(content_file.readlines())
+    h += "</xmp>"
+    return h
+
+@app.route('/systems_exoplanetarchive/<name>')
+def sea(name):
+    return soec(name,"/systems_exoplanetarchive/")
+
 @app.route('/')
 def hello():
     planets_oec = {}
@@ -51,7 +63,12 @@ def hello():
         return systems_ea.get(elem)[0]
     sk = sorted(systems_ea, key=lu, reverse=True)
     # newest systems
-    h = ""
+    h = """
+    <html>
+    <head>
+    </head>
+    <body>
+    """
     h += "<table border=1>"
     h += "<tr>"
     h += "<th>file</th>"
@@ -61,11 +78,12 @@ def hello():
     h += "<th>planet already in oec?</th>"
     h += "<th>oec file</th>"
     h += "<th>last oec update</th>"
+    h += "<th>actions</th>"
     h += "</tr>"
     for i in range(10):
         h += "<tr>"
         k = sk[i]
-        h += "<td>" + k + "</td>"
+        h += "<td><a href='/" + k + "'>"+ os.path.basename(k) + "</a></td>"
         h += "<td>" + systems_ea[k][0] + "</td>"
         h += "<td>" + str(systems_ea[k][1]) + "</td>"
         h += "<td>" + str(", ".join(systems_ea[k][2])) + "</td>"
@@ -81,11 +99,16 @@ def hello():
                     cc += 1
                     oecd = planets_oec_clean[p]
 
-        h += "<td>" + "%d(%d)/%d" %(c, cc, len(systems_ea[k][2])) + "</td>"
-        h += "<td>" + oecd[0] + "</td>"
+        h += "<td>" + "%d/%d/%d" %(c, cc, len(systems_ea[k][2])) + "</td>"
+        h += "<td><a href='/" + oecd[0] + "'>"+ os.path.basename(oecd[0]) + "</a></td>"
         h += "<td>" + oecd[1] + "</td>"
+        h += "<td>  <a href=''>add</a>  <a href=''>ignore</a> </td>"
         h += "</tr>"
     h += "</table>"
+    h += """
+    </body>
+    </html>
+    """
     return h
 
 
