@@ -5,6 +5,7 @@ import shutil
 import xml.etree.ElementTree as ET 
 import xmltools
 import html
+import cleanup
 
 #####################
 # Exoplanet Archive
@@ -17,6 +18,17 @@ def get():
     if not debug:
         urllib.request.urlretrieve (url_exoplanetarchive, "exoplanetarchive.csv")
 
+def add_elem_with_errors(node, name, errorminus="", errorplus="", value=""):
+    if len(errorminus)==0 or len(errorplus)==0:
+        ET.SubElement(node, name).text = value
+        return
+    if float(errorminus)==0. or float(errorplus)==0.:
+        ET.SubElement(node, name).text = value
+        return
+
+    ET.SubElement(node, name, errorminus=errorminus.replace("-",""), errorplus=errorplus).text = value
+
+
 def parse():
     # delete old data
     xmltools.ensure_empty_dir("systems_exoplanetarchive")
@@ -26,13 +38,25 @@ def parse():
     header = [x.strip() for x in f.readline().split(",")]
     for line in f:
         p = dict(zip(header, [x.strip() for x in line.split(",")]))
-        outputfilename = "systems_exoplanetarchive/"+p["pl_hostname"]+".xml"
+        
+        _systemnames = [p["pl_hostname"]]
+        if len(p["hd_name"])>4:
+            _systemnames.append(p["hd_name"])
+        if len(p["hip_name"])>4:
+            _systemnames.append(p["hip_name"])
+        systemnames = []
+        for _sn in _systemnames:
+            if _sn not in systemnames:
+                systemnames.append(_sn)
+        
+        outputfilename = "systems_exoplanetarchive/"+systemnames[0]+".xml"
         if os.path.exists(outputfilename):
             system = ET.parse(outputfilename).getroot()
             star = system.find(".//star")
         else:
             system = ET.Element("system")
-            ET.SubElement(system, "name").text = p["pl_hostname"]
+            for sn in systemnames:
+                ET.SubElement(system, "name").text = sn
             
             tempra = ""
             tempra += p["ra_str"].split("h")[0] # hours
@@ -47,27 +71,31 @@ def parse():
             ET.SubElement(system, "declination").text = tempdec
 
             if len(p["st_dist"])>1:
-                ET.SubElement(system, "distance", errorminus=p['st_disterr2'], errorplus=p['st_disterr1']).text = p["st_dist"]
+                add_elem_with_errors(system, "distance", errorminus=p['st_disterr2'], errorplus=p['st_disterr1'], value=p["st_dist"])
 
             star = ET.SubElement(system,"star")
-            ET.SubElement(star, "name").text = p["pl_hostname"]
-            ET.SubElement(star, "radius", errorminus=p['st_raderr2'], errorplus=p['st_raderr1']).text = p["st_rad"]
-            ET.SubElement(star, "magV", errorminus=p['st_vjerr'], errorplus=p['st_vjerr']).text = p["st_vj"]
-            ET.SubElement(star, "magI", errorminus=p['st_icerr'], errorplus=p['st_icerr']).text = p["st_ic"]
-            ET.SubElement(star, "magJ", errorminus=p['st_jerr'], errorplus=p['st_jerr']).text = p["st_j"]
-            ET.SubElement(star, "magH", errorminus=p['st_herr'], errorplus=p['st_herr']).text = p["st_h"]
-            ET.SubElement(star, "magK", errorminus=p['st_kerr'], errorplus=p['st_kerr']).text = p["st_k"]
-            ET.SubElement(star, "mass", errorminus=p['st_masserr2'], errorplus=p['st_masserr1']).text = p["st_mass"]
-            ET.SubElement(star, "temperature", errorminus=p['st_tefferr2'], errorplus=p['st_tefferr1']).text = p["st_teff"]
-            ET.SubElement(star, "metallicity", errorminus=p['st_metfeerr2'], errorplus=p['st_metfeerr1']).text = p["st_metfe"]
+            for sn in systemnames:
+                ET.SubElement(star, "name").text = sn
+            add_elem_with_errors(star,"radius",p['st_raderr2'], p['st_raderr1'],p["st_rad"])
+
+            add_elem_with_errors(star, "magV", errorminus=p['st_vjerr'], errorplus=p['st_vjerr'],value= p["st_vj"])
+            add_elem_with_errors(star, "magI", errorminus=p['st_icerr'], errorplus=p['st_icerr'],value= p["st_ic"])
+            add_elem_with_errors(star, "magJ", errorminus=p['st_jerr'], errorplus=p['st_jerr'],value= p["st_j"])
+            add_elem_with_errors(star, "magH", errorminus=p['st_herr'], errorplus=p['st_herr'],value= p["st_h"])
+            add_elem_with_errors(star, "magK", errorminus=p['st_kerr'], errorplus=p['st_kerr'],value= p["st_k"])
+            add_elem_with_errors(star, "mass", errorminus=p['st_masserr2'], errorplus=p['st_masserr1'],value= p["st_mass"])
+            add_elem_with_errors(star, "temperature", errorminus=p['st_tefferr2'], errorplus=p['st_tefferr1'],value= p["st_teff"])
+            add_elem_with_errors(star, "metallicity", errorminus=p['st_metfeerr2'], errorplus=p['st_metfeerr1'],value= p["st_metfe"])
+            ET.SubElement(star, "spectraltype").text = p["st_spstr"].replace(" ","")
 
         planet = ET.SubElement(star,"planet")
-        ET.SubElement(planet, "name").text = p["pl_hostname"]+" "+p["pl_letter"]
-        ET.SubElement(planet, "semimajoraxis", errorminus=p["pl_orbsmaxerr2"], errorplus=p["pl_orbsmaxerr1"]).text = p["pl_orbsmax"]
-        ET.SubElement(planet, "eccentricity", errorminus=p['pl_orbeccenerr2'], errorplus=p['pl_orbeccenerr1']).text = p["pl_orbeccen"]
-        ET.SubElement(planet, "periastron", errorminus=p['pl_orblpererr2'], errorplus=p['pl_orblpererr1']).text = p["pl_orblper"]
-        ET.SubElement(planet, "inclination", errorminus=p['pl_orbinclerr2'], errorplus=p['pl_orbinclerr1']).text = p["pl_orbincl"]
-        ET.SubElement(planet, "period", errorminus=p['pl_orbpererr2'], errorplus=p['pl_orbpererr1']).text = p["pl_orbper"]
+        for sn in systemnames:
+            ET.SubElement(planet, "name").text = sn+" "+p["pl_letter"]
+        add_elem_with_errors(planet, "semimajoraxis", errorminus=p["pl_orbsmaxerr2"], errorplus=p["pl_orbsmaxerr1"], value= p["pl_orbsmax"])
+        add_elem_with_errors(planet, "eccentricity", errorminus=p['pl_orbeccenerr2'], errorplus=p['pl_orbeccenerr1'], value= p["pl_orbeccen"])
+        add_elem_with_errors(planet, "periastron", errorminus=p['pl_orblpererr2'], errorplus=p['pl_orblpererr1'], value= p["pl_orblper"])
+        add_elem_with_errors(planet, "inclination", errorminus=p['pl_orbinclerr2'], errorplus=p['pl_orbinclerr1'], value= p["pl_orbincl"])
+        add_elem_with_errors(planet, "period", errorminus=p['pl_orbpererr2'], errorplus=p['pl_orbpererr1'], value= p["pl_orbper"])
 
         description = ""
 
@@ -90,16 +118,17 @@ def parse():
         # check for both kinds of masses
         if p['pl_massj'] == "" or p['pl_massj'] == None:
             # use msini
-            ET.SubElement(planet, "mass", errorminus=p['pl_msinijerr2'], errorplus=p['pl_msinijerr1']).text = p["pl_msinij"]
+            add_elem_with_errors(planet, "mass", errorminus=p['pl_msinijerr2'], errorplus=p['pl_msinijerr1'], value= p["pl_msinij"])
         else: 
             # use mass jupiter
-            ET.SubElement(planet, "mass", errorminus=p['pl_massjerr2'], errorplus=p['pl_massjerr1']).text = p["pl_massj"]
-        ET.SubElement(planet, "radius", errorminus=p['pl_radjerr2'], errorplus=p['pl_radjerr1']).text = p["pl_radj"]
-        ET.SubElement(planet, "temperature", errorminus=p['pl_eqterr2'], errorplus=p['pl_eqterr1']).text = p["pl_eqt"]
+            add_elem_with_errors(planet, "mass", errorminus=p['pl_massjerr2'], errorplus=p['pl_massjerr1'], value= p["pl_massj"])
+        add_elem_with_errors(planet, "radius", errorminus=p['pl_radjerr2'], errorplus=p['pl_radjerr1'], value= p["pl_radj"])
+        add_elem_with_errors(planet, "temperature", errorminus=p['pl_eqterr2'], errorplus=p['pl_eqterr1'], value= p["pl_eqt"])
         if p["pl_discmethod"]=="Radial Velocity":
             ET.SubElement(planet, "discoverymethod").text = "RV"
         elif p["pl_discmethod"]=="Transit":
             ET.SubElement(planet, "discoverymethod").text = "transit"
+            ET.SubElement(planet, "istransiting").text = "1"
         elif p["pl_discmethod"]=="Imaging":
             ET.SubElement(planet, "discoverymethod").text = "imaging"
         elif p["pl_discmethod"]=="Microlensing":
@@ -119,12 +148,13 @@ def parse():
         ET.SubElement(planet, "lastupdate").text = p["rowupdate"][2:].replace("-","/")
 
         # Need to check if BJD
-        ET.SubElement(planet, "transittime", errorminus=p['pl_tranmiderr2'], errorplus=p['pl_tranmiderr1']).text = p["pl_tranmid"]
+        add_elem_with_errors(planet, "transittime", errorminus=p['pl_tranmiderr2'], errorplus=p['pl_tranmiderr1'], value= p["pl_tranmid"])
 
         # Cleanup and write file
         xmltools.removeemptytags(system)
         xmltools.indent(system)
         ET.ElementTree(system).write(outputfilename) 
+        cleanup.checkonefile(outputfilename)
 
 
 
