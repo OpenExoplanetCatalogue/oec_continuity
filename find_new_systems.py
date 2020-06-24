@@ -58,6 +58,11 @@ def showfile(directory,name):
 
 @app.route('/')
 def index():
+    ignored = {}
+    for f in glob.iglob('ignore/*.xml'):
+        with open(f, 'r') as content_file:
+            ignored[os.path.basename(f)] = "".join(content_file.readlines())
+
     planets_oec = {}
     for f in glob.iglob('systems_open_exoplanet_catalogue/*.xml'):
         system = ET.parse(f)
@@ -102,6 +107,7 @@ def index():
     h += "<th>oec file</th>"
     h += "<th>last oec update</th>"
     h += "<th>actions</th>"
+    h += "<th>ignored</th>"
     h += "</tr>"
     for i in range(10):
         h += "<tr>"
@@ -139,12 +145,17 @@ def index():
         h += "<a href=''>add</a> "
         h += "<a href='/ignore/"+os.path.basename(k)+"/"+systems_ea[k][0]+"'>ignore</a> "
         h += "</td>"
+        if os.path.basename(k) in ignored.keys():
+            h += "<td>ignored</td>"
+        else:
+            h += "<td></td>"
         h += "</tr>"
     h += "</table>"
     h += """
     </body>
     </html>
     """
+    print(ignored)
     return h
 
 
