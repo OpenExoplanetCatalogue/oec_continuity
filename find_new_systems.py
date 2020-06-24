@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 import xmltools
 import html
 import glob
-from flask import Flask
+from flask import Flask, redirect, url_for
 app = Flask(__name__)
 
 def cleanplanet(name):
@@ -28,6 +28,11 @@ def compare(name1,name2):
     h += "</frameset>"
     return h
 
+@app.route('/ignore/<name>/<y>/<m>/<d>')
+def ignore(name,y,m,d):
+    with open("ignore/"+name, 'w') as f:
+        f.write(y+"/"+m+"/"+d)
+    return redirect(url_for('index'))
 
 @app.route('/<directory>/<name>')
 def showfile(directory,name):
@@ -132,7 +137,7 @@ def index():
         else:
             h += "<a href='/compare/"+os.path.basename(k) +"/" +os.path.basename(oecd[0])+"'>compare</a> "
         h += "<a href=''>add</a> "
-        h += "<a href=''>ignore</a> "
+        h += "<a href='/ignore/"+os.path.basename(k)+"/"+systems_ea[k][0]+"'>ignore</a> "
         h += "</td>"
         h += "</tr>"
     h += "</table>"
