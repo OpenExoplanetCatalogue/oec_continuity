@@ -120,8 +120,11 @@ def index():
     while shown<30:
         k = sk[i]
         i+=1
+        previouslyignored = 0
         if os.path.basename(k) in ignored.keys():
-            continue
+            if ignored[os.path.basename(k)] == systems_ea[k][0]:
+                continue
+            previouslyignored = 1
         shown += 1
         h += "<tr>"
         h += "<td><a href='/" + k + "'>"+ os.path.basename(k) + "</a></td>"
@@ -162,6 +165,8 @@ def index():
             h += "<a href='/compare/"+os.path.basename(k) +"/" +os.path.basename(oecd[0])+"'>compare</a> "
         h += "<a href='/copy/"+os.path.basename(k)+"/"+systems_ea[k][0]+"'>copy</a> "
         h += "<a href='/ignore/"+os.path.basename(k)+"/"+systems_ea[k][0]+"'>ignore</a> "
+        if previouslyignored==1:
+            h+="*"
         h += "</td>"
         h += "</tr>"
     h += "</table>"
