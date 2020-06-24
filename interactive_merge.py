@@ -34,6 +34,13 @@ def ignore(name,y,m,d):
         f.write(y+"/"+m+"/"+d)
     return redirect(url_for('index'))
 
+@app.route('/copy/<name>/<y>/<m>/<d>')
+def copy(name,y,m,d):
+    shutil.copyfile("systems_exoplanetarchive/"+name,"systems_open_exoplanet_catalogue/"+name)
+    with open("ignore/"+name, 'w') as f:
+        f.write(y+"/"+m+"/"+d)
+    return redirect(url_for('index'))
+
 @app.route('/<directory>/<name>')
 def showfile(directory,name):
     h = """
@@ -149,7 +156,7 @@ def index():
             h += "compare "
         else:
             h += "<a href='/compare/"+os.path.basename(k) +"/" +os.path.basename(oecd[0])+"'>compare</a> "
-        h += "<a href=''>add</a> "
+        h += "<a href='/copy/"+os.path.basename(k)+"/"+systems_ea[k][0]+"'>copy</a> "
         h += "<a href='/ignore/"+os.path.basename(k)+"/"+systems_ea[k][0]+"'>ignore</a> "
         h += "</td>"
         if os.path.basename(k) in ignored.keys():

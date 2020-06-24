@@ -103,9 +103,9 @@ def parse():
             description += "This planet was discovered by " + p["pl_disc_refname"] +". "
             if p["pl_locale"] == "Space":
                 if len(p["pl_telescope"])>5:
-                    description += "The discovery was made with a space spaced telescope ("+p["pl_telescope"]+"). "
+                    description += "The discovery was made with a space based telescope ("+p["pl_telescope"]+"). "
                 else:
-                    description += "The discovery was made with a space spaced telescope. "
+                    description += "The discovery was made with a space based telescope. "
             if p["pl_locale"] == "Ground":
                     description += "This was a ground based discovery. "
         if len(p["pl_def_refname"])>5:
