@@ -84,8 +84,10 @@ def index():
         for planet in system.findall(".//planet"):
             lastupdate = planet.findtext("lastupdate")
             discoveryyear = max(int(planet.findtext("discoveryyear")), discoveryyear)
+            planetnames = []
             for name in planet.findall(".//name"):
-                planets.append(name.text)
+                planetnames.append(name.text)
+            planets.append(planetnames)
         if len(lastupdate)>1:
             systems_ea[f] = [lastupdate, discoveryyear, planets]
     def lu(elem):
@@ -118,20 +120,25 @@ def index():
         oecd = ["", ""]
         pl = []
         for p in systems_ea[k][2]:
+            pmain = p[0]
             c = 0
-            if p in planets_oec.keys():
-                c = 1
-                oecd = planets_oec[p]
-            else:
-                if p in planets_oec_clean.keys():
-                    c = 2
-                    oecd = planets_oec_clean[p]
+            for pmain in p:
+                if pmain in planets_oec.keys():
+                    c = 1
+                    oecd = planets_oec[pmain]
+                    break
+                else:
+                    if pmain in planets_oec_clean.keys():
+                        c = 2
+                        oecd = planets_oec_clean[pmain]
+                        break
+
             if c==0:
-                pl.append(p)
+                pl.append(pmain)
             elif c==1:
-                pl.append("<span style=\"background-color: #FF0000\">"+p+"</span>")
+                pl.append("<span style=\"background-color: #FF0000\">"+pmain+"</span>")
             elif c==2:
-                pl.append("<span style=\"background-color: #FFAA00\">"+p+"</span>")
+                pl.append("<span style=\"background-color: #FFAA00\">"+pmain+"</span>")
 
         h += "<td>" + ", ".join(pl) + "</td>"
 
