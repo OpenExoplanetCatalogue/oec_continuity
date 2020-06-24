@@ -37,9 +37,7 @@ def ignore(name,y,m,d):
 @app.route('/copy/<name>/<y>/<m>/<d>')
 def copy(name,y,m,d):
     shutil.copyfile("systems_exoplanetarchive/"+name,"systems_open_exoplanet_catalogue/"+name)
-    with open("ignore/"+name, 'w') as f:
-        f.write(y+"/"+m+"/"+d)
-    return redirect(url_for('index'))
+    return ignore(name, y, m, d);
 
 @app.route('/<directory>/<name>')
 def showfile(directory,name):
@@ -116,11 +114,16 @@ def index():
     h += "<th>oec file</th>"
     h += "<th>last oec update</th>"
     h += "<th>actions</th>"
-    h += "<th>ignored</th>"
     h += "</tr>"
-    for i in range(10):
-        h += "<tr>"
+    i = 0
+    shown = 0
+    while shown<10:
         k = sk[i]
+        i+=1
+        if os.path.basename(k) in ignored.keys():
+            continue
+        shown += 1
+        h += "<tr>"
         h += "<td><a href='/" + k + "'>"+ os.path.basename(k) + "</a></td>"
         h += "<td>" + systems_ea[k][0] + "</td>"
         h += "<td>" + str(systems_ea[k][1]) + "</td>"
@@ -141,6 +144,7 @@ def index():
                         break
 
             if c==0:
+                pmain = p[0]
                 pl.append(pmain)
             elif c==1:
                 pl.append("<span style=\"background-color: #FF0000\">"+pmain+"</span>")
@@ -159,17 +163,12 @@ def index():
         h += "<a href='/copy/"+os.path.basename(k)+"/"+systems_ea[k][0]+"'>copy</a> "
         h += "<a href='/ignore/"+os.path.basename(k)+"/"+systems_ea[k][0]+"'>ignore</a> "
         h += "</td>"
-        if os.path.basename(k) in ignored.keys():
-            h += "<td>ignored</td>"
-        else:
-            h += "<td></td>"
         h += "</tr>"
     h += "</table>"
     h += """
     </body>
     </html>
     """
-    print(ignored)
     return h
 
 
