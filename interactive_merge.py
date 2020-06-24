@@ -117,7 +117,7 @@ def index():
     h += "</tr>"
     i = 0
     shown = 0
-    while shown<10:
+    while shown<30:
         k = sk[i]
         i+=1
         if os.path.basename(k) in ignored.keys():
