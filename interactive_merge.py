@@ -17,6 +17,7 @@ def cleanplanet(name):
     name = name.replace("A", "") 
     name = name.replace("B", "") 
     name = name.replace("C", "") 
+    name = name.replace("D", "") 
     return name
 
 
@@ -78,6 +79,8 @@ def index():
     planets_oec_clean = {}          
     for p in planets_oec.keys():
         p_clean = cleanplanet(p)
+        if "Vir" in p_clean:
+            print(p_clean)
         planets_oec_clean[p_clean] = planets_oec[p]
 
     systems_ea = {}
@@ -141,9 +144,10 @@ def index():
                     oecd = planets_oec[pmain]
                     break
                 else:
-                    if pmain in planets_oec_clean.keys():
+                    cleanpmain = cleanplanet(pmain)
+                    if cleanpmain in planets_oec_clean.keys():
                         c = 2
-                        oecd = planets_oec_clean[pmain]
+                        oecd = planets_oec_clean[cleanpmain]
                         break
 
             if c==0:
