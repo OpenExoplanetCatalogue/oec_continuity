@@ -51,7 +51,7 @@ def showfile(directory,name):
     </head>
     <body>
     """
-    h += "<pre><code class='xml'>"
+    h += "<pre style='white-space: pre-wrap;'><code class='xml'>"
     with open(directory+"/"+name, 'r') as content_file:
         h += html.escape("".join(content_file.readlines()))
     h += "</pre></code>"
@@ -79,8 +79,6 @@ def index():
     planets_oec_clean = {}          
     for p in planets_oec.keys():
         p_clean = cleanplanet(p)
-        if "Vir" in p_clean:
-            print(p_clean)
         planets_oec_clean[p_clean] = planets_oec[p]
 
     systems_ea = {}
