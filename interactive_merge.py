@@ -5,6 +5,7 @@ import shutil
 import xml.etree.ElementTree as ET 
 import xmltools
 import html
+import math
 import glob
 from flask import Flask, redirect, url_for
 app = Flask(__name__)
@@ -61,6 +62,20 @@ def showfile(directory,name):
     """
     return h
 
+def radec(ra,dec):
+    ra = ra.split(" ")
+    dec = dec.split(" ")
+    raf = float(ra[0])
+    decf = float(dec[0])
+    sign = 1.
+    if decf<0.:
+        sign = -1.
+    raf += float(ra[1])/24.
+    decf += sign*float(dec[1])/60.
+    raf += float(ra[2])/24./60.
+    decf += sign*float(dec[2])/60./60.
+    return (raf/12.*math.pi, decf/180.*math.pi)
+
 
 @app.route('/')
 def index():
@@ -70,12 +85,19 @@ def index():
             ignored[os.path.basename(f)] = "".join(content_file.readlines())
 
     planets_oec = {}
+    planets_oec_radec = []
     for f in glob.iglob('systems_open_exoplanet_catalogue/*.xml'):
         system = ET.parse(f)
         for planet in system.findall(".//planet"):
             lastupdate = planet.findtext("lastupdate")
             for name in planet.findall(".//name"):
                 planets_oec[name.text] = [f, lastupdate]
+        dec = system.findtext("declination")
+        ra = system.findtext("rightascension")
+        if dec:
+            raf, decf = radec(ra, dec)
+            decf += math.pi/2.
+            planets_oec_radec.append([raf, decf, os.path.basename(f)])
     planets_oec_clean = {}          
     for p in planets_oec.keys():
         p_clean = cleanplanet(p)
@@ -94,8 +116,23 @@ def index():
             for name in planet.findall(".//name"):
                 planetnames.append(name.text)
             planets.append(planetnames)
+        closest_d = 1000.
+        closest_name = ""
+        dec_ea = system.findtext("declination")
+        ra_ea = system.findtext("rightascension")
+        if dec:
+            raf_ea, decf_ea = radec(ra_ea, dec_ea)
+            decf_ea += math.pi/2.
+            sin_decf_ea = math.sin(decf_ea)
+            cos_decf_ea = math.cos(decf_ea)
+            for raf, decf, name in planets_oec_radec:
+                d = 2.-2.*(math.sin(decf)*sin_decf_ea*math.cos(raf-raf_ea)+math.cos(decf)*cos_decf_ea)
+                if d<closest_d:
+                    closest_name = name
+                    closest_d = d
+
         if len(lastupdate)>1:
-            systems_ea[f] = [lastupdate, discoveryyear, planets]
+            systems_ea[f] = [lastupdate, discoveryyear, planets, closest_name]
     def lu(elem):
         return systems_ea.get(elem)[0]
     sk = sorted(systems_ea, key=lu, reverse=True)
@@ -112,13 +149,14 @@ def index():
     h += "<th>last-update</th>"
     h += "<th>discovery year</th>"
     h += "<th>planets found</th>"
+    h += "<th>closest system</th>"
     h += "<th>oec file</th>"
     h += "<th>last oec update</th>"
     h += "<th>actions</th>"
     h += "</tr>"
     i = 0
     shown = 0
-    while shown<300:
+    while shown<500:
         k = sk[i]
         i+=1
         previouslyignored = 0
@@ -157,6 +195,7 @@ def index():
                 pl.append("<span style=\"background-color: #FFAA00\">"+pmain+"</span>")
 
         h += "<td>" + ", ".join(pl) + "</td>"
+        h += "<td>" + systems_ea[k][3] + "</td>"
 
         h += "<td><a href='/" + oecd[0] + "'>"+ os.path.basename(oecd[0]) + "</a></td>"
         h += "<td>" + oecd[1] + "</td>"
