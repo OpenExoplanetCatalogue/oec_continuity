@@ -97,7 +97,7 @@ def index():
         if dec:
             raf, decf = radec(ra, dec)
             decf += math.pi/2.
-            planets_oec_radec.append([raf, decf, os.path.basename(f)])
+            planets_oec_radec.append([raf, decf, f])
     planets_oec_clean = {}          
     for p in planets_oec.keys():
         p_clean = cleanplanet(p)
@@ -149,8 +149,7 @@ def index():
     h += "<th>last-update</th>"
     h += "<th>discovery year</th>"
     h += "<th>planets found</th>"
-    h += "<th>closest system</th>"
-    h += "<th>oec file</th>"
+    h += "<th>oec file (closest)</th>"
     h += "<th>last oec update</th>"
     h += "<th>actions</th>"
     h += "</tr>"
@@ -195,9 +194,12 @@ def index():
                 pl.append("<span style=\"background-color: #FFAA00\">"+pmain+"</span>")
 
         h += "<td>" + ", ".join(pl) + "</td>"
-        h += "<td>" + systems_ea[k][3] + "</td>"
 
-        h += "<td><a href='/" + oecd[0] + "'>"+ os.path.basename(oecd[0]) + "</a></td>"
+        h += "<td><a href='/" + oecd[0] + "'>"+ os.path.basename(oecd[0]) +"</a>"
+        if (oecd[0]!=systems_ea[k][3]):
+            h += " <a style=\"background-color: #FFAAAA\" href='/" + systems_ea[k][3] + "'>" + os.path.basename(systems_ea[k][3]) + "</a>"
+        h += "</td>"
+
         h += "<td>" + oecd[1] + "</td>"
         h += "<td>"
         if len(oecd[0])==0:
