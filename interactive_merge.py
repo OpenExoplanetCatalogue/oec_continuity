@@ -86,7 +86,9 @@ def index():
 
     planets_oec = {}
     planets_oec_radec = []
+    oec_files = []
     for f in glob.iglob('systems_open_exoplanet_catalogue/*.xml'):
+        oec_files.append(os.path.basename(f))
         system = ET.parse(f)
         for planet in system.findall(".//planet"):
             lastupdate = planet.findtext("lastupdate")
@@ -132,7 +134,7 @@ def index():
                     closest_d = d
 
         if len(lastupdate)>1:
-            systems_ea[f] = [lastupdate, discoveryyear, planets, closest_name]
+            systems_ea[f] = [lastupdate, discoveryyear, planets, closest_name, closest_d]
     def lu(elem):
         return systems_ea.get(elem)[0]
     sk = sorted(systems_ea, key=lu, reverse=True)
@@ -197,16 +199,23 @@ def index():
 
         h += "<td><a href='/" + oecd[0] + "'>"+ os.path.basename(oecd[0]) +"</a>"
         if (oecd[0]!=systems_ea[k][3]):
-            h += " <a style=\"background-color: #FFAAAA\" href='/" + systems_ea[k][3] + "'>" + os.path.basename(systems_ea[k][3]) + "</a>"
+            h += " <a style=\"background-color: #00FFFF\" href='/" + systems_ea[k][3] + "'>" + os.path.basename(systems_ea[k][3]) + "</a>"
+            h += " (%.2f)"%(100.*math.sqrt(systems_ea[k][4])) 
         h += "</td>"
 
         h += "<td>" + oecd[1] + "</td>"
         h += "<td>"
         if len(oecd[0])==0:
-            h += "compare "
+            if len(systems_ea[k][3]):
+                h += "<a href='/compare/"+os.path.basename(k) +"/" +os.path.basename(systems_ea[k][3])+"'>compare</a> "
+            else:
+                h += "compare "
         else:
             h += "<a href='/compare/"+os.path.basename(k) +"/" +os.path.basename(oecd[0])+"'>compare</a> "
-        h += "<a href='/copy/"+os.path.basename(k)+"/"+systems_ea[k][0]+"'>copy</a> "
+        if os.path.basename(k) in oec_files:
+            h += "<a style=\"background-color: #FF0000\" href='/copy/"+os.path.basename(k)+"/"+systems_ea[k][0]+"'>copy</a> "
+        else:
+            h += "<a href='/copy/"+os.path.basename(k)+"/"+systems_ea[k][0]+"'>copy</a> "
         h += "<a href='/ignore/"+os.path.basename(k)+"/"+systems_ea[k][0]+"'>ignore</a> "
         if previouslyignored==1:
             h+="*"
