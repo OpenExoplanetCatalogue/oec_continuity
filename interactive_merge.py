@@ -34,12 +34,12 @@ def compare(name1,name2):
 def ignore(name,y,m,d):
     with open("ignore/"+name, 'w') as f:
         f.write(y+"/"+m+"/"+d)
-    return redirect(url_for('index'))
+    return "ignored"
 
 @app.route('/copy/<name>/<y>/<m>/<d>')
 def copy(name,y,m,d):
     shutil.copyfile("systems_exoplanetarchive/"+name,"systems_open_exoplanet_catalogue/"+name)
-    return ignore(name, y, m, d);
+    return "copied, " + ignore(name, y, m, d);
 
 @app.route('/<directory>/<name>')
 def showfile(directory,name):

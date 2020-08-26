@@ -148,6 +148,9 @@ def parse():
 
         # Need to check if BJD
         add_elem_with_errors(planet, "transittime", errorminus=p['pl_tranmiderr2'], errorplus=p['pl_tranmiderr1'], value= p["pl_tranmid"])
+        
+        # all planets new by default. 
+        ET.SubElement(planet, "new").text = "1"
 
         # Cleanup and write file
         xmltools.removeemptytags(system)
