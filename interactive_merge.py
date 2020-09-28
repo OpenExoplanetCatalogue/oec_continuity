@@ -157,7 +157,7 @@ def index():
     h += "</tr>"
     i = 0
     shown = 0
-    while shown<500:
+    while shown<1500:
         k = sk[i]
         i+=1
         previouslyignored = 0
@@ -203,7 +203,10 @@ def index():
             h += " (%.2f)"%(100.*math.sqrt(systems_ea[k][4])) 
         h += "</td>"
 
-        h += "<td>" + oecd[1] + "</td>"
+        try:
+            h += "<td>" + oecd[1] + "</td>"
+        except:
+            h += "<td>unknown</td>"  # unknown last update
         h += "<td>"
         if len(oecd[0])==0:
             if len(systems_ea[k][3]):
