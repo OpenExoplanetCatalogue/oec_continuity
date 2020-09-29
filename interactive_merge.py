@@ -157,7 +157,7 @@ def index():
     h += "</tr>"
     i = 0
     shown = 0
-    while shown<1500:
+    while i < len(sk) and shown < 5000:
         k = sk[i]
         i+=1
         previouslyignored = 0
