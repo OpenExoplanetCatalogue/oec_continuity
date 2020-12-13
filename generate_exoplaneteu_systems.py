@@ -126,7 +126,7 @@ def parse():
             add_elem_with_errors(planet, "inclination", errorminus=p['inclination_error_min'], errorplus=p['inclination_error_max'], value= p["inclination"])
             add_elem_with_errors(planet, "period", errorminus=p['orbital_period_error_min'], errorplus=p['orbital_period_error_max'], value= p["orbital_period"])
 
-           # description = ""
+            description = ""
 
            # if len(p["pl_disc_refname"])>5:
            #     description += "This planet was discovered by " + p["pl_disc_refname"] +". "
@@ -138,41 +138,40 @@ def parse():
            #     if p["pl_locale"] == "Ground":
            #             description += "This was a ground based discovery. "
            # if len(p["pl_def_refname"])>5:
-           #     description += "The parameters listed here are those reported by " + p["pl_def_refname"] + " and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive. " 
+            description += "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website. " 
 
-           # description = html.unescape(description)
+            description = html.unescape(description)
            # #print(description)
-           # ET.SubElement(planet, "description").text = description
+            ET.SubElement(planet, "description").text = description
 
-           # # check for both kinds of masses
-           # if p['pl_massj'] == "" or p['pl_massj'] == None:
-           #     # use msini
-           #     add_elem_with_errors(planet, "mass", errorminus=p['pl_msinijerr2'], errorplus=p['pl_msinijerr1'], value= p["pl_msinij"])
-           # else: 
-           #     # use mass jupiter
-           #     add_elem_with_errors(planet, "mass", errorminus=p['pl_massjerr2'], errorplus=p['pl_massjerr1'], value= p["pl_massj"])
-           # add_elem_with_errors(planet, "radius", errorminus=p['pl_radjerr2'], errorplus=p['pl_radjerr1'], value= p["pl_radj"])
-           # add_elem_with_errors(planet, "temperature", errorminus=p['pl_eqterr2'], errorplus=p['pl_eqterr1'], value= p["pl_eqt"])
-           # if p["pl_discmethod"]=="Radial Velocity":
-           #     ET.SubElement(planet, "discoverymethod").text = "RV"
-           # elif p["pl_discmethod"]=="Transit":
-           #     ET.SubElement(planet, "discoverymethod").text = "transit"
-           #     ET.SubElement(planet, "istransiting").text = "1"
-           # elif p["pl_discmethod"]=="Imaging":
-           #     ET.SubElement(planet, "discoverymethod").text = "imaging"
-           # elif p["pl_discmethod"]=="Microlensing":
-           #     ET.SubElement(planet, "discoverymethod").text = "microlensing"
-           # elif p["pl_discmethod"]=="Eclipse Timing Variations":
-           #     ET.SubElement(planet, "discoverymethod").text = "timing"
-           # elif p["pl_discmethod"]=="Pulsation Timing Variations":
-           #     ET.SubElement(planet, "discoverymethod").text = "timing"
-           # elif p["pl_discmethod"]=="Pulsar Timing":
-           #     ET.SubElement(planet, "discoverymethod").text = "timing"
-           # elif p["pl_discmethod"]=="Transit Timing Variations":
-           #     ET.SubElement(planet, "discoverymethod").text = "timing"
-           # else:
-           #     print("new discovery method:"+ p["pl_discmethod"])
-           # ET.SubElement(planet, "discoveryyear").text = p["pl_disc"]
+            # check for both kinds of masses
+            if p['mass'] == "" or p['mass'] == None:
+                # use msini
+                add_elem_with_errors(planet, "mass", errorminus=p['mass_sini_error_min'], errorplus=p['mass_sini_error_max'], value= p["mass_sini"])
+            else: 
+                # use mass jupiter
+                add_elem_with_errors(planet, "mass", errorminus=p['mass_error_min'], errorplus=p['mass_error_max'], value= p["mass"])
+            add_elem_with_errors(planet, "radius", errorminus=p['radius_error_min'], errorplus=p['radius_error_max'], value= p["radius"])
+            if p['temp_measured'] == "" or p['temp_measured'] == None:
+                add_elem_with_errors(planet, "temperature", errorminus=p['temp_calculated_error_min'], errorplus=p['temp_calculated_error_max'], value= p["temp_calculated"])
+            else:
+                add_elem_with_errors(planet, "temperature", errorminus="", errorplus="", value= p["temp_measured"])
+            if p["detection_type"]=="Radial Velocity":
+                ET.SubElement(planet, "discoverymethod").text = "RV"
+            elif "Transit" in p["detection_type"]:
+                ET.SubElement(planet, "discoverymethod").text = "transit"
+            elif p["detection_type"]=="Imaging":
+                ET.SubElement(planet, "discoverymethod").text = "imaging"
+            elif p["detection_type"]=="Microlensing":
+                ET.SubElement(planet, "discoverymethod").text = "microlensing"
+            elif "Timing" in p["detection_type"] or "TTV" in p["detection_type"]:
+                ET.SubElement(planet, "discoverymethod").text = "timing"
+            else:
+                print("new discovery method:", p["detection_type"])
+            
+            if "Transit" in p["detection_type"] or "Transit" in p["mass_detection_type"] or "Transit" in p["radius_detection_type"]:
+                ET.SubElement(planet, "istransiting").text = "1"
+            ET.SubElement(planet, "discoveryyear").text = p["discovered"]
             ET.SubElement(planet, "list").text = "Confirmed planets"
             ET.SubElement(planet, "lastupdate").text = p["updated"][2:].strip().replace("-","/")
 
