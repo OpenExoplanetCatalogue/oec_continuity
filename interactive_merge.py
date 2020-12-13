@@ -1,6 +1,7 @@
 #!/usr/bin/python 
 import urllib.request
 import os
+import sys
 import shutil
 import xml.etree.ElementTree as ET 
 import xmltools
@@ -25,20 +26,20 @@ def cleanplanet(name):
 @app.route('/compare/<name1>/<name2>/')
 def compare(name1,name2):
     h = "<frameset cols=\"50%,50%\">"
-    h += "<frame src=\"/systems_exoplanetarchive/"+name1+"\"/>"
+    h += "<frame src=\"/"+catalogue+"/"+name1+"\"/>"
     h += "<frame src=\"/systems_open_exoplanet_catalogue/"+name2+"\"/>"
     h += "</frameset>"
     return h
 
 @app.route('/ignore/<name>/<y>/<m>/<d>')
 def ignore(name,y,m,d):
-    with open("ignore/"+name, 'w') as f:
+    with open(catalogue+"_ignore/"+name, 'w') as f:
         f.write(y+"/"+m+"/"+d)
     return "ignored"
 
 @app.route('/copy/<name>/<y>/<m>/<d>')
 def copy(name,y,m,d):
-    shutil.copyfile("systems_exoplanetarchive/"+name,"systems_open_exoplanet_catalogue/"+name)
+    shutil.copyfile(""+catalogue+"/"+name,"systems_open_exoplanet_catalogue/"+name)
     return "copied, " + ignore(name, y, m, d);
 
 @app.route('/<directory>/<name>')
@@ -80,7 +81,7 @@ def radec(ra,dec):
 @app.route('/')
 def index():
     ignored = {}
-    for f in glob.iglob('ignore/*.xml'):
+    for f in glob.iglob(catalogue+'_ignore/*.xml'):
         with open(f, 'r') as content_file:
             ignored[os.path.basename(f)] = "".join(content_file.readlines())
 
@@ -106,7 +107,7 @@ def index():
         planets_oec_clean[p_clean] = planets_oec[p]
 
     systems_ea = {}
-    for f in glob.iglob('systems_exoplanetarchive/*.xml'):
+    for f in glob.iglob(catalogue+'/*.xml'):
         system = ET.parse(f)
         lastupdate = ""
         discoveryyear = 0
@@ -235,6 +236,10 @@ def index():
 
 
 if __name__ == '__main__':
+    if len(sys.argv)>1:
+        catalogue = sys.argv[1]
+    else:
+        catalogue = "systems_exoplanetarchive"
     app.run(debug=True)
 
 

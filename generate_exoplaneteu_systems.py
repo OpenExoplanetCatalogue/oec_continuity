@@ -80,6 +80,8 @@ def parse():
                     ra -= ram/60.
                     ras = ra*60*60
                     ET.SubElement(system, "rightascension").text = "%02.0f %02.0f %02.2f"% (rah, ram, ras)
+                else:
+                    ET.SubElement(system, "rightascension").text = "00 00 00.00" # special object?
                 
                 dec = float(p["dec"])
                 if dec>0.:
@@ -89,7 +91,7 @@ def parse():
                     dec -= decm/60.
                     decs = dec*60*60
                     ET.SubElement(system, "declination").text = "+%02.0f %02.0f %02.2f"% (decd, decm, decs)
-                if dec<0.:
+                elif dec<0.:
                     dec *= -1
                     decd = math.floor(dec)
                     dec -= decd
@@ -97,6 +99,8 @@ def parse():
                     dec -= decm/60.
                     decs = dec*60*60
                     ET.SubElement(system, "declination").text = "-%02.0f %02.0f %02.2f"% (decd, decm, decs)
+                else:
+                    ET.SubElement(system, "declination").text = "+00 00 00.00"
 
 
                 if len(p["star_distance"])>1:
@@ -171,7 +175,10 @@ def parse():
             
             if "Transit" in p["detection_type"] or "Transit" in p["mass_detection_type"] or "Transit" in p["radius_detection_type"]:
                 ET.SubElement(planet, "istransiting").text = "1"
-            ET.SubElement(planet, "discoveryyear").text = p["discovered"]
+            if len(p["discovered"].strip()):
+                ET.SubElement(planet, "discoveryyear").text = p["discovered"].strip()
+            else:
+                ET.SubElement(planet, "discoveryyear").text = "2019" # some planets don't have a discovery year??
             ET.SubElement(planet, "list").text = "Confirmed planets"
             ET.SubElement(planet, "lastupdate").text = p["updated"][2:].strip().replace("-","/")
 
