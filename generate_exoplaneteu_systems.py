@@ -102,29 +102,29 @@ def parse():
                 if len(p["star_distance"])>1:
                     add_elem_with_errors(system, "distance", errorminus=p['star_distance_error_min'], errorplus=p['star_distance_error_max'], value=p["star_distance"])
 
-           #     star = ET.SubElement(system,"star")
-           #     for sn in systemnames:
-           #         ET.SubElement(star, "name").text = sn
-           #     add_elem_with_errors(star,"radius",p['st_raderr2'], p['st_raderr1'],p["st_rad"])
+                star = ET.SubElement(system,"star")
+                for sn in systemnames:
+                    ET.SubElement(star, "name").text = sn
+                add_elem_with_errors(star,"radius",p['star_radius_error_min'], p['star_radius_error_max'],p["star_radius"])
 
-           #     add_elem_with_errors(star, "magV", errorminus=p['st_vjerr'], errorplus=p['st_vjerr'],value= p["st_vj"])
-           #     add_elem_with_errors(star, "magI", errorminus=p['st_icerr'], errorplus=p['st_icerr'],value= p["st_ic"])
-           #     add_elem_with_errors(star, "magJ", errorminus=p['st_jerr'], errorplus=p['st_jerr'],value= p["st_j"])
-           #     add_elem_with_errors(star, "magH", errorminus=p['st_herr'], errorplus=p['st_herr'],value= p["st_h"])
-           #     add_elem_with_errors(star, "magK", errorminus=p['st_kerr'], errorplus=p['st_kerr'],value= p["st_k"])
-           #     add_elem_with_errors(star, "mass", errorminus=p['st_masserr2'], errorplus=p['st_masserr1'],value= p["st_mass"])
-           #     add_elem_with_errors(star, "temperature", errorminus=p['st_tefferr2'], errorplus=p['st_tefferr1'],value= p["st_teff"])
-           #     add_elem_with_errors(star, "metallicity", errorminus=p['st_metfeerr2'], errorplus=p['st_metfeerr1'],value= p["st_metfe"])
-           #     ET.SubElement(star, "spectraltype").text = p["st_spstr"].replace(" ","")
+                add_elem_with_errors(star, "magV", "", "",value= p["mag_v"])
+                add_elem_with_errors(star, "magI", "", "",value= p["mag_i"])
+                add_elem_with_errors(star, "magJ", "", "",value= p["mag_j"])
+                add_elem_with_errors(star, "magH", "", "",value= p["mag_h"])
+                add_elem_with_errors(star, "magK", "", "",value= p["mag_k"])
+                add_elem_with_errors(star, "mass", errorminus=p['star_mass_error_min'], errorplus=p['star_mass_error_max'],value= p["star_mass"])
+                add_elem_with_errors(star, "temperature", errorminus=p['star_teff_error_min'], errorplus=p['star_teff_error_max'],value= p["star_teff"])
+                add_elem_with_errors(star, "metallicity", errorminus=p['star_metallicity_error_min'], errorplus=p['star_metallicity_error_max'],value= p["star_metallicity"])
+                ET.SubElement(star, "spectraltype").text = p["star_sp_type"].replace(" ","")
 
-           # planet = ET.SubElement(star,"planet")
-           # for sn in systemnames:
-           #     ET.SubElement(planet, "name").text = sn+" "+p["pl_letter"]
-           # add_elem_with_errors(planet, "semimajoraxis", errorminus=p["pl_orbsmaxerr2"], errorplus=p["pl_orbsmaxerr1"], value= p["pl_orbsmax"])
-           # add_elem_with_errors(planet, "eccentricity", errorminus=p['pl_orbeccenerr2'], errorplus=p['pl_orbeccenerr1'], value= p["pl_orbeccen"])
-           # add_elem_with_errors(planet, "periastron", errorminus=p['pl_orblpererr2'], errorplus=p['pl_orblpererr1'], value= p["pl_orblper"])
-           # add_elem_with_errors(planet, "inclination", errorminus=p['pl_orbinclerr2'], errorplus=p['pl_orbinclerr1'], value= p["pl_orbincl"])
-           # add_elem_with_errors(planet, "period", errorminus=p['pl_orbpererr2'], errorplus=p['pl_orbpererr1'], value= p["pl_orbper"])
+            planet = ET.SubElement(star,"planet")
+            for name in [p["# name"]]+p["alternate_names"].split(","):
+                ET.SubElement(planet, "name").text = name.strip()
+            add_elem_with_errors(planet, "semimajoraxis", errorminus=p["semi_major_axis_error_min"], errorplus=p["semi_major_axis_error_max"], value= p["semi_major_axis"])
+            add_elem_with_errors(planet, "eccentricity", errorminus=p['eccentricity_error_min'], errorplus=p['eccentricity_error_max'], value= p["eccentricity"])
+            add_elem_with_errors(planet, "periastron", errorminus=p['omega_error_min'], errorplus=p['omega_error_max'], value= p["omega"])
+            add_elem_with_errors(planet, "inclination", errorminus=p['inclination_error_min'], errorplus=p['inclination_error_max'], value= p["inclination"])
+            add_elem_with_errors(planet, "period", errorminus=p['orbital_period_error_min'], errorplus=p['orbital_period_error_max'], value= p["orbital_period"])
 
            # description = ""
 
@@ -173,14 +173,14 @@ def parse():
            # else:
            #     print("new discovery method:"+ p["pl_discmethod"])
            # ET.SubElement(planet, "discoveryyear").text = p["pl_disc"]
-           # ET.SubElement(planet, "list").text = "Confirmed planets"
-           # ET.SubElement(planet, "lastupdate").text = p["rowupdate"][2:].replace("-","/")
+            ET.SubElement(planet, "list").text = "Confirmed planets"
+            ET.SubElement(planet, "lastupdate").text = p["updated"][2:].strip().replace("-","/")
 
            # # Need to check if BJD
            # add_elem_with_errors(planet, "transittime", errorminus=p['pl_tranmiderr2'], errorplus=p['pl_tranmiderr1'], value= p["pl_tranmid"])
            # 
            # # all planets new by default. 
-           # ET.SubElement(planet, "new").text = "1"
+            ET.SubElement(planet, "new").text = "1"
 
             # Cleanup and write file
             xmltools.removeemptytags(system)

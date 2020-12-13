@@ -2,5 +2,7 @@ venv/
 *.pyc
 __pycache__/
 systems_exoplanetarchive/
+systems_exoplaneteu/
 systems_open_exoplanet_catalogue
 exoplanetarchive.csv
+exoplaneteu.csv
