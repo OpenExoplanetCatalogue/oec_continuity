@@ -20,6 +20,13 @@ def get():
         urllib.request.urlretrieve (url_exoplaneteu, "exoplaneteu.csv")
 
 def add_elem_with_errors(node, name, errorminus="", errorplus="", value=""):
+    if len(errorplus)>0 and len(errorminus)>0 and len(value)>0:
+        if float(errorplus) == 0. and float(value)==float(errorminus):
+            ET.SubElement(node, name, upperlimit=value.strip()).text = ""
+            return
+        if float(errorminus) == 0. and float(value)==float(errorplus):
+            ET.SubElement(node, name, lowerlimit=value.strip()).text = ""
+            return
     if "nan" in errorminus or "inf" in errorminus:
         errorminus = ""
     if "nan" in errorplus or "inf" in errorplus:

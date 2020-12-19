@@ -57,17 +57,20 @@ def parse():
             for sn in systemnames:
                 ET.SubElement(system, "name").text = sn
             
-            tempra = ""
-            tempra += p["ra_str"].split("h")[0] # hours
-            tempra += " " + p["ra_str"].split("h")[1].split("m")[0] # minutes
-            tempra += " %.2i" % (round(float(p["ra_str"].split("h")[1].split("m")[1].split("s")[0]))) # seconds
-            ET.SubElement(system, "rightascension").text = tempra
+            if len(p["ra_str"]):
+                tempra = ""
+                tempra += p["ra_str"].split("h")[0] # hours
+                tempra += " " + p["ra_str"].split("h")[1].split("m")[0] # minutes
+                tempra += " %.2i" % (round(float(p["ra_str"].split("h")[1].split("m")[1].split("s")[0]))) # seconds
+                ET.SubElement(system, "rightascension").text = tempra
 
-            tempdec = ""
-            tempdec += p["dec_str"].split("d")[0] # hours
-            tempdec += " " + p["dec_str"].split("d")[1].split("m")[0] # minutes
-            tempdec += " %.2i" % (round(float(p["dec_str"].split("d")[1].split("m")[1].split("s")[0]))) # seconds
-            ET.SubElement(system, "declination").text = tempdec
+                tempdec = ""
+                tempdec += p["dec_str"].split("d")[0] # hours
+                tempdec += " " + p["dec_str"].split("d")[1].split("m")[0] # minutes
+                tempdec += " %.2i" % (round(float(p["dec_str"].split("d")[1].split("m")[1].split("s")[0]))) # seconds
+                ET.SubElement(system, "declination").text = tempdec
+            else:
+                print("Warning: no coordinates for "+outputfilename)
 
             if len(p["st_dist"])>1:
                 add_elem_with_errors(system, "distance", errorminus=p['st_disterr2'], errorplus=p['st_disterr1'], value=p["st_dist"])
