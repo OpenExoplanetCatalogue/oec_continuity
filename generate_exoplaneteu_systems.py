@@ -29,6 +29,10 @@ def add_elem_with_errors(node, name, errorminus="", errorplus="", value=""):
             return
     if "nan" in errorminus or "inf" in errorminus:
         errorminus = ""
+    if "e" in errorminus :
+        errorminus = "%f"%float(errorminus)
+    if "e" in errorplus :
+        errorplus = "%f"%float(errorplus)
     if "nan" in errorplus or "inf" in errorplus:
         errorplus = ""
     if len(errorminus)==0 or len(errorplus)==0:
@@ -86,7 +90,7 @@ def parse():
                     ram = math.floor(ra*60.)
                     ra -= ram/60.
                     ras = ra*60*60
-                    ET.SubElement(system, "rightascension").text = "%02.0f %02.0f %02.2f"% (rah, ram, ras)
+                    ET.SubElement(system, "rightascension").text = "%02.0f %02.0f %05.2f"% (rah, ram, ras)
                 else:
                     ET.SubElement(system, "rightascension").text = "00 00 00.00" # special object?
                 
@@ -97,7 +101,7 @@ def parse():
                     decm = math.floor(dec*60.)
                     dec -= decm/60.
                     decs = dec*60*60
-                    ET.SubElement(system, "declination").text = "+%02.0f %02.0f %02.2f"% (decd, decm, decs)
+                    ET.SubElement(system, "declination").text = "+%02.0f %02.0f %05.2f"% (decd, decm, decs)
                 elif dec<0.:
                     dec *= -1
                     decd = math.floor(dec)
@@ -105,7 +109,7 @@ def parse():
                     decm = math.floor(dec*60.)
                     dec -= decm/60.
                     decs = dec*60*60
-                    ET.SubElement(system, "declination").text = "-%02.0f %02.0f %02.2f"% (decd, decm, decs)
+                    ET.SubElement(system, "declination").text = "-%02.0f %02.0f %05.2f"% (decd, decm, decs)
                 else:
                     ET.SubElement(system, "declination").text = "+00 00 00.00"
 
