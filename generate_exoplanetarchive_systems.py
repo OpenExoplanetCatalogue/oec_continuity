@@ -23,7 +23,11 @@ def remove_tags(text):
 def get():
     answer = input("download new version?").lower()
     if answer=="y":
+        shutil.copyfile("exoplanetarchive.csv","exoplanetarchive_backup.csv")
         urllib.request.urlretrieve (url_exoplanetarchive, "exoplanetarchive.csv")
+        with open("dates_exoplanetarchive.txt","a+") as w:
+            w.write(now.strftime("%y/%m/%d"))
+
 
 def add_elem_with_errors(node, name, errorminus="", errorplus="", value=""):
     if len(errorminus)==0 or len(errorplus)==0:
@@ -40,13 +44,28 @@ def parse():
     # delete old data
     xmltools.ensure_empty_dir("systems_exoplanetarchive")
 
+    oldhash = {}
+    with open('exoplanetarchive_backup.csv') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            pl_name = row["pl_name"]
+            h = hash(str(row))
+            oldhash[pl_name] = h
     # parse data into default xml format
     with open('exoplanetarchive.csv') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            parserow(row)
+            pl_name = row["pl_name"]
+            h = hash(str(row))
+            isnew = 0
+            if pl_name not in oldhash:
+                isnew = 1
+            else:
+                if oldhash[pl_name]!=h:
+                    isnew = 1
+            parserow(row, isnew)
 
-def parserow(p):
+def parserow(p, isnew):
         _systemnames = [p["hostname"]]
         if len(p["hd_name"])>4:
             _systemnames.append(p["hd_name"])
@@ -155,8 +174,10 @@ def parserow(p):
             print("new discovery method:"+ discoverymethod)
         ET.SubElement(planet, "discoveryyear").text = p["disc_year"]
         ET.SubElement(planet, "list").text = "Confirmed planets"
-        ET.SubElement(planet, "lastupdate").text = (p["disc_pubdate"][2:]+"-01").replace("-","/")
-        #ET.SubElement(planet, "lastupdate").text = now.strftime("%y/%m/%d")
+        if isnew==1:
+            ET.SubElement(planet, "lastupdate").text = now.strftime("%y/%m/%d")
+        else:
+            ET.SubElement(planet, "lastupdate").text = (p["disc_pubdate"][2:]+"-01").replace("-","/")
 
         # Need to check if BJD
         add_elem_with_errors(planet, "transittime", errorminus=p['pl_tranmiderr2'], errorplus=p['pl_tranmiderr1'], value= p["pl_tranmid"])
