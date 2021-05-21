@@ -203,7 +203,7 @@ def index():
         h += "<td><a href='/" + oecd[0] + "'>"+ os.path.basename(oecd[0]) +"</a>"
         if (oecd[0]!=systems_ea[k][3]):
             h += " <a style=\"background-color: #00FFFF\" href='/" + systems_ea[k][3] + "'>" + os.path.basename(systems_ea[k][3]) + "</a>"
-            h += " (%.2f)"%(100.*math.sqrt(systems_ea[k][4])) 
+            h += " (%.2f)"%(100.*math.sqrt(abs(systems_ea[k][4]))) 
         h += "</td>"
 
         try:

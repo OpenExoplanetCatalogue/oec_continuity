@@ -26,7 +26,7 @@ def get():
         shutil.copyfile("exoplanetarchive.csv","exoplanetarchive_backup.csv")
         urllib.request.urlretrieve (url_exoplanetarchive, "exoplanetarchive.csv")
         with open("dates_exoplanetarchive.txt","a+") as w:
-            w.write(now.strftime("%y/%m/%d"))
+            w.write(now.strftime("%y/%m/%d\n"))
 
 
 def add_elem_with_errors(node, name, errorminus="", errorplus="", value=""):
