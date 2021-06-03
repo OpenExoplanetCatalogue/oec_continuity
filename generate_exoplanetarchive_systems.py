@@ -3,9 +3,11 @@ import urllib.request
 import os
 import shutil
 import datetime
+import glob
 import xml.etree.ElementTree as ET 
 import xmltools
 import html
+import hashlib
 import re
 import csv
 import cleanup
@@ -15,6 +17,7 @@ import cleanup
 #####################
 url_exoplanetarchive = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+pscomppars&format=csv"
 now = datetime.datetime.now()
+        
 
 TAG_RE = re.compile(r'<[^>]+>')
 def remove_tags(text):
@@ -39,31 +42,46 @@ def add_elem_with_errors(node, name, errorminus="", errorplus="", value=""):
 
     ET.SubElement(node, name, errorminus=errorminus.replace("-",""), errorplus=errorplus).text = value
 
+def getHash(f):
+    system = ET.parse(f).getroot()
+    planets = system.findall(".//planet")
+    for planet in planets:
+        es = planet.findall("./lastupdate")
+        for e in es:
+            planet.remove(e)
+        es = planet.findall("./new")
+        for e in es:
+            planet.remove(e)
+    s = ET.tostring(system, encoding='utf8', method='text')
+    md5 = hashlib.md5()
+    md5.update(s)
+    return md5.hexdigest()
 
 def parse():
+    oldhashes = {}
+    for f  in glob.glob("systems_exoplanetarchive_backup_may20/*.xml"):
+        systemname = f.split("/")[1].split(".")[0]
+        oldhashes[systemname] = getHash(f)
+    
     # delete old data
     xmltools.ensure_empty_dir("systems_exoplanetarchive")
 
-    oldhash = {}
-    with open('exoplanetarchive_backup.csv') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            pl_name = row["pl_name"]
-            h = hash(str(row))
-            oldhash[pl_name] = h
     # parse data into default xml format
     with open('exoplanetarchive.csv') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             pl_name = row["pl_name"]
-            h = hash(str(row))
-            isnew = 0
-            if pl_name not in oldhash:
-                isnew = 1
+            systemname, system =  parserow(row, False)
+            outputfilename = "systems_exoplanetarchive/"+systemname+".xml"
+
+            ET.ElementTree(system).write(outputfilename) 
+            cleanup.checkonefile(outputfilename)
+            newHash = getHash(outputfilename)
+            if systemname in oldhashes:
+                if oldhashes[systemname]!=newHash:
+                    print("new hash for", systemname)
             else:
-                if oldhash[pl_name]!=h:
-                    isnew = 1
-            parserow(row, isnew)
+                print("new system for", systemname)
 
 def parserow(p, isnew):
         _systemnames = [p["hostname"]]
@@ -188,9 +206,11 @@ def parserow(p, isnew):
         # Cleanup and write file
         xmltools.removeemptytags(system)
         xmltools.indent(system)
-        ET.ElementTree(system).write(outputfilename) 
-        cleanup.checkonefile(outputfilename)
+        return systemnames[0], system
 
+
+#        ET.ElementTree(system).write(outputfilename) 
+#        cleanup.checkonefile(outputfilename)
 
 
 if __name__=="__main__":
