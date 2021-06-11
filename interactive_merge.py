@@ -116,6 +116,10 @@ def index():
         planets = []
         for planet in system.findall(".//planet"):
             lastupdate = planet.findtext("lastupdate")
+            if int(lastupdate[0])>7:
+                lastupdate = "19"+lastupdate
+            else:
+                lastupdate = "20"+lastupdate
             discoveryyear = max(int(planet.findtext("discoveryyear")), discoveryyear)
             planetnames = []
             for name in planet.findall(".//name"):
@@ -151,7 +155,7 @@ def index():
     h += "<table border=1>"
     h += "<tr>"
     h += "<th>file</th>"
-    h += "<th>last-update</th>"
+    h += "<th>lastupdate</th>"
     h += "<th>discovery year</th>"
     h += "<th>planets found</th>"
     h += "<th>oec file (closest)</th>"

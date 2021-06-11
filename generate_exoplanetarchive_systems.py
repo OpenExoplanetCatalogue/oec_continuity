@@ -71,19 +71,32 @@ def parse():
         reader = csv.DictReader(csvfile)
         for row in reader:
             pl_name = row["pl_name"]
-            systemname, system =  parserow(row, False)
+            systemname, system =  parserow(row)
             outputfilename = "systems_exoplanetarchive/"+systemname+".xml"
 
             ET.ElementTree(system).write(outputfilename) 
             cleanup.checkonefile(outputfilename)
-            newHash = getHash(outputfilename)
-            if systemname in oldhashes:
-                if oldhashes[systemname]!=newHash:
-                    print("new hash for", systemname)
-            else:
-                print("new system for", systemname)
 
-def parserow(p, isnew):
+    print("Now checking if any changes occured")
+
+    for filename in glob.glob("systems_exoplanetarchive/*.xml"):
+        f = open(filename, 'rt')
+        newhash = getHash(f)
+        f = open(filename, 'rt')
+        root = ET.parse(f).getroot()
+        systemname = root.findtext("./name")
+        try:
+            oldhash = oldhashes[systemname]
+        except:
+            oldhash = "n/a"
+        if oldhash != newhash:
+            for lastupdate in root.findall(".//planet/lastupdate"):
+                lastupdate.text = now.strftime("%y/%m/%d")
+            ET.ElementTree(root).write(filename) 
+            cleanup.checkonefile(filename)
+            print("new  hash ", systemname)
+
+def parserow(p):
         _systemnames = [p["hostname"]]
         if len(p["hd_name"])>4:
             _systemnames.append(p["hd_name"])
@@ -192,10 +205,7 @@ def parserow(p, isnew):
             print("new discovery method:"+ discoverymethod)
         ET.SubElement(planet, "discoveryyear").text = p["disc_year"]
         ET.SubElement(planet, "list").text = "Confirmed planets"
-        if isnew==1:
-            ET.SubElement(planet, "lastupdate").text = now.strftime("%y/%m/%d")
-        else:
-            ET.SubElement(planet, "lastupdate").text = (p["disc_pubdate"][2:]+"-01").replace("-","/")
+        ET.SubElement(planet, "lastupdate").text = (p["disc_pubdate"][2:]+"-01").replace("-","/")
 
         # Need to check if BJD
         add_elem_with_errors(planet, "transittime", errorminus=p['pl_tranmiderr2'], errorplus=p['pl_tranmiderr1'], value= p["pl_tranmid"])
