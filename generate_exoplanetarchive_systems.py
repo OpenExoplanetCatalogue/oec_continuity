@@ -10,11 +10,14 @@ import html
 import hashlib
 import re
 import csv
+import shutil
+import os
 import cleanup
 
 #####################
 # Exoplanet Archive
 #####################
+backup_dir = "systems_exoplanetarchive_backup"
 url_exoplanetarchive = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+pscomppars&format=csv"
 now = datetime.datetime.now()
         
@@ -24,9 +27,15 @@ def remove_tags(text):
     return TAG_RE.sub('', text).strip()
 
 def get():
+    answer = input("copy current data to backup dir?").lower()
+    if answer=="y":
+        for f in glob.glob(backup_dir+"*.xml"):
+            os.remove(f)
+        for f in glob.glob("systems_exoplanetarchive/*.xml"):
+            shutil.copyfile(f, backup_dir+"/"+os.path.basename(f))
+
     answer = input("download new version?").lower()
     if answer=="y":
-        shutil.copyfile("exoplanetarchive.csv","exoplanetarchive_backup.csv")
         urllib.request.urlretrieve (url_exoplanetarchive, "exoplanetarchive.csv")
         with open("dates_exoplanetarchive.txt","a+") as w:
             w.write(now.strftime("%y/%m/%d\n"))
@@ -59,7 +68,7 @@ def getHash(f):
 
 def parse():
     oldhashes = {}
-    for f  in glob.glob("systems_exoplanetarchive_backup_may20/*.xml"):
+    for f  in glob.glob(backup_dir+"/*.xml"):
         systemname = f.split("/")[1].split(".")[0]
         oldhashes[systemname] = getHash(f)
     
