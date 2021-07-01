@@ -66,6 +66,10 @@ def showfile(directory,name):
 def radec(ra,dec):
     if ra is None or dec is None:
         return 0,0
+    ra = ra.replace("\xc2\xa0", " ")
+    dec = dec.replace("\xc2\xa0", " ")
+    ra = ra.replace("\xa0", " ")
+    dec = dec.replace("\xa0", " ")
     ra = ra.split(" ")
     dec = dec.split(" ")
     raf = float(ra[0])
