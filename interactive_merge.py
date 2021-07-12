@@ -66,10 +66,10 @@ def showfile(directory,name):
 def radec(ra,dec):
     if ra is None or dec is None:
         return 0,0
-    ra = ra.replace("\xc2\xa0", " ")
-    dec = dec.replace("\xc2\xa0", " ")
-    ra = ra.replace("\xa0", " ")
-    dec = dec.replace("\xa0", " ")
+    #ra = ra.replace("\xc2\xa0", " ")
+    #dec = dec.replace("\xc2\xa0", " ")
+    #ra = ra.replace("\xa0", " ")
+    #dec = dec.replace("\xa0", " ")
     ra = ra.split(" ")
     dec = dec.split(" ")
     raf = float(ra[0])
@@ -104,7 +104,10 @@ def index():
         dec = system.findtext("declination")
         ra = system.findtext("rightascension")
         if dec:
-            raf, decf = radec(ra, dec)
+            try:
+                raf, decf = radec(ra, dec)
+            except:
+                print(f)
             decf += math.pi/2.
             planets_oec_radec.append([raf, decf, f])
     planets_oec_clean = {}          
