@@ -121,6 +121,7 @@ def index():
         lastupdate = ""
         discoveryyear = 0
         planets = []
+        mass = 0.
         for planet in system.findall(".//planet"):
             lastupdate = planet.findtext("lastupdate")
             if int(lastupdate[0])>7:
@@ -132,6 +133,10 @@ def index():
             for name in planet.findall(".//name"):
                 planetnames.append(name.text)
             planets.append(planetnames)
+            try:
+                mass = max(mass,float(planet.findtext("mass")))
+            except:
+                pass
         closest_d = 1000.
         closest_name = ""
         dec_ea = system.findtext("declination")
@@ -147,8 +152,9 @@ def index():
                     closest_name = name
                     closest_d = d
 
+
         if len(lastupdate)>1:
-            systems_ea[f] = [lastupdate, discoveryyear, planets, closest_name, closest_d]
+            systems_ea[f] = [lastupdate, discoveryyear, planets, closest_name, closest_d, mass]
     def lu(elem):
         return systems_ea.get(elem)[0]
     sk = sorted(systems_ea, key=lu, reverse=True)
@@ -163,6 +169,7 @@ def index():
     h += "<tr>"
     h += "<th>file</th>"
     h += "<th>lastupdate</th>"
+    h += "<th>mass</th>"
     h += "<th>discovery year</th>"
     h += "<th>planets found</th>"
     h += "<th>oec file (closest)</th>"
@@ -183,7 +190,11 @@ def index():
         h += "<tr>"
         h += "<td><a href='/" + k + "'>"+ os.path.basename(k) + "</a></td>"
         h += "<td>" + systems_ea[k][0] + "</td>"
-        h += "<td>" + str(systems_ea[k][1]) + "</td>"
+        h += "<td>" + str(systems_ea[k][5]) + "</td>"
+        if systems_ea[k][1]>0.:
+            h += "<td>%0.5f</td>"% systems_ea[k][1] # mass
+        else:
+            h += "<td></td>"
         oecd = ["", ""]
         pl = []
         for p in systems_ea[k][2]:
