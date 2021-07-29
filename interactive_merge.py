@@ -190,9 +190,15 @@ def index():
         h += "<tr>"
         h += "<td><a href='/" + k + "'>"+ os.path.basename(k) + "</a></td>"
         h += "<td>" + systems_ea[k][0] + "</td>"
-        h += "<td>" + str(systems_ea[k][5]) + "</td>"
+        if systems_ea[k][5]>0.: # mass
+            if systems_ea[k][5]>15.:
+                h += "<td  style=\"text-align:right; font-family:monospace; background-color:orange;\">%.4f</td>" % systems_ea[k][5]
+            else:
+                h += "<td  style=\"text-align:right; font-family:monospace\">%.4f</td>" % systems_ea[k][5]
+        else:
+            h += "<td></td>"
         if systems_ea[k][1]>0.:
-            h += "<td>%0.5f</td>"% systems_ea[k][1] # mass
+            h += "<td>%d</td>"% systems_ea[k][1] # discovery year
         else:
             h += "<td></td>"
         oecd = ["", ""]
