@@ -2,6 +2,7 @@
 import urllib.request
 import os
 import shutil
+import sys
 import datetime
 import glob
 import xml.etree.ElementTree as ET 
@@ -27,14 +28,20 @@ def remove_tags(text):
     return TAG_RE.sub('', text).strip()
 
 def get():
-    answer = input("copy current data to backup dir?").lower()
+    if "download" in sys.argv:
+        answer = "y"
+    else:
+        answer = input("copy current data to backup dir?").lower()
     if answer=="y":
         for f in glob.glob(backup_dir+"*.xml"):
             os.remove(f)
         for f in glob.glob("systems_exoplanetarchive/*.xml"):
             shutil.copyfile(f, backup_dir+"/"+os.path.basename(f))
 
-    answer = input("download new version?").lower()
+    if "download" in sys.argv:
+        answer = "y"
+    else:
+        answer = input("download new version?").lower()
     if answer=="y":
         urllib.request.urlretrieve (url_exoplanetarchive, "exoplanetarchive.csv")
         with open("dates_exoplanetarchive.txt","a+") as w:

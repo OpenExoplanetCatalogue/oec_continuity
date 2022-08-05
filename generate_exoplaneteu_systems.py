@@ -1,5 +1,6 @@
 #!/usr/bin/python 
 import urllib.request
+import sys
 import os
 import shutil
 import xml.etree.ElementTree as ET 
@@ -15,7 +16,10 @@ import cleanup
 url_exoplaneteu = "http://exoplanet.eu/catalog/csv/"
 
 def get():
-    answer = input("download new version?").lower()
+    if "download" in sys.argv:
+        answer = "y"
+    else:
+        answer = input("download new version?").lower()
     if answer=="y":
         urllib.request.urlretrieve (url_exoplaneteu, "exoplaneteu.csv")
 
