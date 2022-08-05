@@ -11,5 +11,12 @@ echo "Updating OEC"
 pushd ../open_exoplanet_catalogue
 python cleanup.py systems_exoplaneteu
 python cleanup.py systems_exoplanetarchive
+git commit -a -m "Automated nightly update from oec_continuity"
+git push
+popd
 
+
+echo "Updating OEC_gzip"
+pushd ../oec_gzip
+./update_everything.bash
 popd
