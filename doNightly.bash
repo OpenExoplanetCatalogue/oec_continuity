@@ -2,10 +2,10 @@
 source venv/bin/activate
 
 echo "Working on exoplanet.eu"
-#python generate_exoplaneteu_systems.py download
+python generate_exoplaneteu_systems.py download
 
 echo "Working on ExoplanetArchive"
-#python generate_exoplanetarchive_systems.py download
+python generate_exoplanetarchive_systems.py download
 
 echo "Updating OEC"
 pushd ../open_exoplanet_catalogue
