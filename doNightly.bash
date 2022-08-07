@@ -9,6 +9,8 @@ python generate_exoplanetarchive_systems.py download
 
 echo "Updating OEC"
 pushd ../open_exoplanet_catalogue
+cp systems/Sun.xml systems_exoplaneteu/
+cp systems/Sun.xml systems_exoplanetarchive/
 python cleanup.py systems_exoplaneteu
 python cleanup.py systems_exoplanetarchive
 git commit -a -m "Automated nightly update from oec_continuity"
