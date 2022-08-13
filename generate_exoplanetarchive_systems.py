@@ -92,8 +92,19 @@ def parse():
 
             ET.ElementTree(system).write(outputfilename) 
             cleanup.checkonefile(outputfilename)
+    
+    print("Reading previous planet list")
+    previous_planets = {}
+    with open("exoplanetarchive_previous_planets.xml", 'rt') as f:
+        previous_planets_root = ET.parse(f).getroot()
+        for planet in previous_planets_root.findall(".//planet"):
+            name = planet.findtext("./name")
+            first_seen = planet.findtext("./first_seen")
+            previous_planets[name] = first_seen
+
 
     print("Now checking if any changes occured")
+    
 
     for filename in glob.glob("systems_exoplanetarchive/*.xml"):
         f = open(filename, 'rt')
@@ -101,6 +112,28 @@ def parse():
         f = open(filename, 'rt')
         root = ET.parse(f).getroot()
         systemname = root.findtext("./name")
+        changed = False
+        for planet in root.findall(".//planet"):
+            name = planet.findtext("./name")
+            markasnew = False
+            if name in previous_planets:
+                d1 = datetime.datetime.strptime(datetime.datetime.today().strftime('%Y-%m-%d'), "%Y-%m-%d")
+                d2 = datetime.datetime.strptime(previous_planets[name], "%Y-%m-%d")
+                age = (d1-d2)
+                if age.days <= 5:
+                    markasnew = True
+                print(age.days)
+
+            if name not in previous_planets:
+                new_planet = ET.SubElement(previous_planets_root, "planet")
+                ET.SubElement(new_planet, "name").text = name
+                ET.SubElement(new_planet, "first_seen").text = datetime.datetime.today().strftime('%Y-%m-%d')
+                markasnew = True
+            if markasnew:
+                ET.SubElement(planet, "new").text = "1"
+                changed = True
+                print("New planet found: " + name)
+                
         try:
             oldhash = oldhashes[systemname]
         except:
@@ -108,9 +141,15 @@ def parse():
         if oldhash != newhash:
             for lastupdate in root.findall(".//planet/lastupdate"):
                 lastupdate.text = now.strftime("%y/%m/%d")
+            changed = True
+
+        if changed:
             ET.ElementTree(root).write(filename) 
             cleanup.checkonefile(filename)
-            print("new  hash ", systemname)
+    
+    xmltools.indent(previous_planets_root)
+    ET.ElementTree(previous_planets_root).write("exoplanetarchive_previous_planets.xml") 
+
 
 def parserow(p):
         _systemnames = [p["hostname"]]
@@ -227,7 +266,7 @@ def parserow(p):
         add_elem_with_errors(planet, "transittime", errorminus=p['pl_tranmiderr2'], errorplus=p['pl_tranmiderr1'], value= p["pl_tranmid"])
         
         # all planets new by default. 
-        ET.SubElement(planet, "new").text = "1"
+        # ET.SubElement(planet, "new").text = "1"
 
         # Cleanup and write file
         xmltools.removeemptytags(system)
