@@ -150,9 +150,9 @@ def parse():
     xmltools.indent(previous_planets_root)
     ET.ElementTree(previous_planets_root).write("exoplanetarchive_previous_planets.xml") 
 
-    with open("exoplanet_archive_new_today.txt") as f:
+    with open("exoplanetarchive_new_planets_found_today.txt", "w") as f:
         for planet in new_planets_found_today:
-        f.write(planet + "\n")
+            f.write(planet + "\n")
 
 
 def parserow(p):
