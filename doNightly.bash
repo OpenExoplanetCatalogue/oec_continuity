@@ -20,12 +20,14 @@ git push
 popd
 
 
-echo "Updating OEC_iphone"
-pushd ../oec_iphone/scripts
-python create_data_iphone_11.python
-popd
-
 echo "Updating OEC_gzip"
 pushd ../oec_gzip
 ./update_everything.bash
+popd
+
+
+echo "Updating OEC_iphone"
+pushd ../oec_iphone
+deactivate
+bash update_open_exoplanet_catalogue.bash
 popd
