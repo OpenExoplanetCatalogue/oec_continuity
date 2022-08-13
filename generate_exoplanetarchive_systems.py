@@ -104,7 +104,7 @@ def parse():
 
 
     print("Now checking if any changes occured")
-    
+    new_planets_found_today = [] 
 
     for filename in glob.glob("systems_exoplanetarchive/*.xml"):
         f = open(filename, 'rt')
@@ -120,14 +120,14 @@ def parse():
                 d1 = datetime.datetime.strptime(datetime.datetime.today().strftime('%Y-%m-%d'), "%Y-%m-%d")
                 d2 = datetime.datetime.strptime(previous_planets[name], "%Y-%m-%d")
                 age = (d1-d2)
-                if age.days <= 5:
+                if age.days <= 5 and previous_planets[name]!="2022-08-13":
                     markasnew = True
-                print(age.days)
 
             if name not in previous_planets:
                 new_planet = ET.SubElement(previous_planets_root, "planet")
                 ET.SubElement(new_planet, "name").text = name
                 ET.SubElement(new_planet, "first_seen").text = datetime.datetime.today().strftime('%Y-%m-%d')
+                new_planets_found_today.append(name)
                 markasnew = True
             if markasnew:
                 ET.SubElement(planet, "new").text = "1"
@@ -149,6 +149,10 @@ def parse():
     
     xmltools.indent(previous_planets_root)
     ET.ElementTree(previous_planets_root).write("exoplanetarchive_previous_planets.xml") 
+
+    with open("exoplanet_archive_new_today.txt") as f:
+        for planet in new_planets_found_today:
+        f.write(planet + "\n")
 
 
 def parserow(p):
