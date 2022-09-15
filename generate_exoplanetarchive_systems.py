@@ -116,6 +116,7 @@ def parse():
         for planet in root.findall(".//planet"):
             name = planet.findtext("./name")
             markasnew = False
+            #markasnew = True
             if name in previous_planets:
                 d1 = datetime.datetime.strptime(datetime.datetime.today().strftime('%Y-%m-%d'), "%Y-%m-%d")
                 d2 = datetime.datetime.strptime(previous_planets[name], "%Y-%m-%d")
