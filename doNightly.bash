@@ -1,5 +1,5 @@
 #!/bin/bash
-source venv/bin/activate
+source /home/rein/oec_web/venv/bin/activate
 
 echo "Working on exoplanet.eu"
 python generate_exoplaneteu_systems.py download
