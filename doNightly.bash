@@ -1,6 +1,10 @@
 #!/bin/bash
 source /home/rein/oec_web/venv/bin/activate
 
+echo "Clean github host key"
+ssh-keygen -R github.com
+ssh-keyscan github.com >> ~/.ssh/known_hosts
+
 echo "Working on exoplanet.eu"
 python generate_exoplaneteu_systems.py download
 python findnew.py systems_exoplaneteu
