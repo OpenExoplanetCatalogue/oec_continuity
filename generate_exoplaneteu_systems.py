@@ -222,7 +222,6 @@ def parse():
 
 
     print("Now checking if any changes occured")
-    new_planets_found_today = [] 
 
     for filename in glob.glob("systems_exoplaneteu/*.xml"):
         f = open(filename, 'rt')
@@ -244,7 +243,6 @@ def parse():
                 new_planet = ET.SubElement(previous_planets_root, "planet")
                 ET.SubElement(new_planet, "name").text = name
                 ET.SubElement(new_planet, "first_seen").text = datetime.datetime.today().strftime('%Y-%m-%d')
-                new_planets_found_today.append(name)
                 markasnew = True
             if markasnew:
                 ET.SubElement(planet, "new").text = "1"
@@ -257,10 +255,6 @@ def parse():
     
     xmltools.indent(previous_planets_root)
     ET.ElementTree(previous_planets_root).write("exoplaneteu_previous_planets.xml") 
-
-    with open("exoplaneteu_new_planets_found_today.txt", "w") as f:
-        for planet in new_planets_found_today:
-            f.write(planet + "\n")
 
 
 if __name__=="__main__":
