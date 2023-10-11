@@ -32,7 +32,6 @@ popd
 
 
 echo "Updating OEC_iphone"
-pushd ../oec_iphone
-deactivate
-bash update_open_exoplanet_catalogue.bash
+pushd ../oec_iphone/scripts
+python create_data_iphone_11.python
 popd
