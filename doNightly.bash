@@ -30,6 +30,11 @@ pushd ../oec_gzip
 ./update_everything.bash
 popd
 
+echo "Updating OEC_tables"
+pushd ../oec_tables
+./update_everything.bash
+popd
+
 
 echo "Updating OEC_iphone"
 pushd ../oec_iphone/scripts
