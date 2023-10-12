@@ -40,3 +40,11 @@ echo "Updating OEC_iphone"
 pushd ../oec_iphone/scripts
 python create_data_iphone_11.python
 popd
+		
+pushd ../oec_meta/
+./update_everything.bash
+popd
+
+pushd ../oec_web/
+touch oec.wsgi
+popd
