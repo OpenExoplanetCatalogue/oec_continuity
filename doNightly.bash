@@ -15,6 +15,7 @@ echo "Working on Open Exoplanet Catalogue (only checking for new planets)"
 python generate_openexoplanetcatalogue_systems.py
 
 echo "Updating OEC"
+git pull
 pushd ../open_exoplanet_catalogue
 cp systems/Sun.xml systems_exoplaneteu/
 cp systems/Sun.xml systems_exoplanetarchive/
