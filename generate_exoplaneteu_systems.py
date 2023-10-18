@@ -72,7 +72,7 @@ def parse():
                 for extraname in p["star_alternate_names"].split(","):
                     systemnames.append(extraname.strip())
             if len(systemnames)==0:
-                pname = p["# name"]
+                pname = p["name"]
                 if pname[-2:] == " b":
                     pname = pname[:-2]
                 systemnames.append(pname)
@@ -89,7 +89,10 @@ def parse():
                 for sn in systemnames:
                     ET.SubElement(system, "name").text = sn
                 
-                ra = float(p["ra"])/360.*24.
+                try:
+                    ra = float(p["ra"])/360.*24.
+                except:
+                    ra = 0.
                 if ra!=0.:
                     rah = math.floor(ra)
                     ra -= rah
@@ -100,7 +103,10 @@ def parse():
                 else:
                     ET.SubElement(system, "rightascension").text = "00 00 00.00" # special object?
                 
-                dec = float(p["dec"])
+                try:
+                    dec = float(p["dec"])
+                except:
+                    dec = 0.
                 if dec>0.:
                     decd = math.floor(dec)
                     dec -= decd
@@ -139,7 +145,7 @@ def parse():
                 ET.SubElement(star, "spectraltype").text = p["star_sp_type"].replace(" ","")
 
             planet = ET.SubElement(star,"planet")
-            for name in [p["# name"]]+p["alternate_names"].split(","):
+            for name in [p["name"]]+p["alternate_names"].split(","):
                 ET.SubElement(planet, "name").text = name.strip()
             add_elem_with_errors(planet, "semimajoraxis", errorminus=p["semi_major_axis_error_min"], errorplus=p["semi_major_axis_error_max"], value= p["semi_major_axis"])
             add_elem_with_errors(planet, "eccentricity", errorminus=p['eccentricity_error_min'], errorplus=p['eccentricity_error_max'], value= p["eccentricity"])
@@ -213,12 +219,16 @@ def parse():
 
     print("Reading previous planet list")
     previous_planets = {}
-    with open("exoplaneteu_previous_planets.xml", 'rt') as f:
-        previous_planets_root = ET.parse(f).getroot()
-        for planet in previous_planets_root.findall(".//planet"):
-            name = planet.findtext("./name")
-            first_seen = planet.findtext("./first_seen")
-            previous_planets[name] = first_seen
+    if os.path.exists("exoplaneteu_previous_planets.xml"):
+        with open("exoplaneteu_previous_planets.xml", 'rt') as f:
+            previous_planets_root = ET.parse(f).getroot()
+            for planet in previous_planets_root.findall(".//planet"):
+                name = planet.findtext("./name")
+                first_seen = planet.findtext("./first_seen")
+                previous_planets[name] = first_seen
+    else:
+        previous_planets_root = ET.Element("previous_planets")
+
 
 
     print("Now checking if any changes occured")
